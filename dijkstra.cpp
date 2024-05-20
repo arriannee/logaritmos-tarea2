@@ -12,10 +12,10 @@ struct Edge {
 
 // Definición de un nodo
 struct Node {
-    int num;                                  // Número del nodo
+    int id;                                  // Identificación del nodo (no necesariamente es un número)
     std::map<int, std::vector<Edge>> matrix;  // El int identifica al nodo, el vector contiene las aristas
 
-    Node(int num) : num(num) {}
+    Node(int id) : id(id) {}
 };
 
 // Definición de un grafo

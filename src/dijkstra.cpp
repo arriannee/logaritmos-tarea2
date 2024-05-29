@@ -1,7 +1,6 @@
 #include <iostream>
 #include <vector>
 #include <map>
-#include <unordered_map>
 #include <limits>
 #include <cmath>
 #include <algorithm>
@@ -9,57 +8,18 @@
 
 #include "fibonacci.cpp"
 
-// Generar un número aleatorio en el rango (0, 1]
-double randomWeight() {
-    static std::mt19937_64 rng(std::random_device{}());
-    static std::uniform_real_distribution<double> dist(0.0000001, 1.0);
-    return dist(rng);
-}
-
-// Generar un grafo conexo y no dirigido con v nodos y e aristas
-Graph generateGraph(int v, int e) {
-    Graph graph;
-    for (int i = 0; i < v; ++i) {
-        graph.addNode(i);
-    }
-
-    std::mt19937 rng(std::random_device{}());
-
-    // Asegurar la conectividad con un árbol cobertor
-    for (int i = 1; i < v; ++i) {
-        std::uniform_int_distribution<int> dist(0, i - 1);
-        int j = dist(rng);
-        double weight = randomWeight();
-        graph.addEdge(i, j, weight);
-    }
-
-    // Añadir las aristas restantes
-    int extraEdges = e - (v - 1);
-    for (int i = 0; i < extraEdges; ++i) {
-        std::uniform_int_distribution<int> dist(0, v - 1);
-        int u = dist(rng);
-        int w = dist(rng);
-        while (u == w || !graph.nodes[u].matrix[w].empty()) {
-            u = dist(rng);
-            w = dist(rng);
-        }
-        double weight = randomWeight();
-        graph.addEdge(u, w, weight);
-    }
-
-    return graph;
-}
+using namespace std;
 
 // Implementación de Dijkstra utilizando Cola de Fibonacci
 void dijkstraWithFibonacci(Graph& graph, int root) {
-    std::unordered_map<int, FibonacciNode*> nodeMap;
+    map<int, FibonacciNode*> nodeMap;
     FibonacciHeap fibHeap;
 
-    std::map<int, double> distances;
-    std::map<int, int> previous;
+    map<int, double> distances;
+    map<int, int> previous;
 
     for (const auto& node : graph.nodes) {
-        distances[node.first] = std::numeric_limits<double>::infinity();
+        distances[node.first] = numeric_limits<double>::infinity();
         previous[node.first] = -1;
     }
     distances[root] = 0.0;
@@ -86,24 +46,24 @@ void dijkstraWithFibonacci(Graph& graph, int root) {
     }
 
     // Imprimir los resultados
-    std::cout << "Distancias desde el nodo " << root << ":\n";
+    cout << "Distancias desde el nodo " << root << ":\n";
     for (const auto& d : distances) {
         std::cout << "Nodo " << d.first << ": " << d.second << "\n";
     }
 
-    std::cout << "\n Previos: \n";
+    cout << "\n Previos: \n";
     for (const auto& p : previous) {
-        std::cout << "Nodo " << p.first << ": " << p.second << "\n";
+        cout << "Nodo " << p.first << ": " << p.second << "\n";
     }
 }
 
 // Función para reconstruir el camino más corto desde el nodo raíz hasta el nodo objetivo
-std::vector<int> reconstruirCamino(const std::map<int, int>& previos, int objetivo) {
-    std::vector<int> camino;
+vector<int> reconstruirCamino(const std::map<int, int>& previos, int objetivo) {
+    vector<int> camino;
     for (int en = objetivo; en != -1; en = previos.at(en)) {
         camino.push_back(en);
     }
-    std::reverse(camino.begin(), camino.end());
+    reverse(camino.begin(), camino.end());
     return camino;
 }
 
@@ -130,14 +90,14 @@ void testDijkstraWithFibonacci() {
     dijkstraWithFibonacci(graph, 0);
 
     // Reconstruir y mostrar el camino más corto desde 0 a 4
-    std::map<int, int> previos = {{0, -1}, {1, 0}, {2, 0}, {3, 2}, {4, 3}};
-    std::vector<int> camino = reconstruirCamino(previos, 4);
+    map<int, int> previos = {{0, -1}, {1, 0}, {2, 0}, {3, 2}, {4, 3}};
+    vector<int> camino = reconstruirCamino(previos, 4);
 
-    std::cout << "Camino más corto desde 0 hasta 4: ";
+    cout << "Camino más corto desde 0 hasta 4: ";
     for (int nodo : camino) {
-        std::cout << nodo << " ";
+        cout << nodo << " ";
     }
-    std::cout << "\n";
+    cout << "\n";
 }
 
 int main() {

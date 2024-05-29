@@ -19,7 +19,7 @@ void testInsert() {
     if (fibHeap.minNode->id == 2) {
         std::cout << "testInsert OK!: el nodo minimo es el correcto." << std::endl;
     } else {
-        std::cout << "Test failed: el nodo minimo no es, en efecto, el minimo." << std::endl;
+        std::cout << "Test FAIL: el nodo minimo no es, en efecto, el minimo." << std::endl;
     }  
 }
 
@@ -67,7 +67,7 @@ void testCut() {
 // Función para imprimir la lista de raíces 
 void printRootList(FibonacciNode* minNode) {
     if (minNode == nullptr) {
-        std::cout << "La lista de raíces está vacía." << std::endl;
+        std::cout << "La lista de raices esta vacia." << std::endl;
         return;
     }
 
@@ -100,9 +100,9 @@ void testDecreaseKey() {
 
     // Verificar si el nodo mínimo es el esperado
     if (fibHeap.minNode->id == 3) {
-        std::cout << "Test passed: el nodo mínimo es el correcto después de decreaseKey." << std::endl;
+        std::cout << "Test OK!: el nodo mínimo es el correcto después de decreaseKey." << std::endl;
     } else {
-        std::cout << "Test failed: el nodo mínimo no es el esperado después de decreaseKey." << std::endl;
+        std::cout << "Test FAIL!: el nodo mínimo no es el esperado después de decreaseKey." << std::endl;
     }
 }
 

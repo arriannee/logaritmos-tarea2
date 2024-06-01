@@ -5,7 +5,7 @@ using namespace std;
 
 
 struct Heap{
-    vector<tuple<double, Node>> par;
+    vector<tuple<double, Node>> pares;
 
     // Se tiene en la estructura de un heap, siendo i el índice de un nodo:
     // El padre de un nodo siempre está en (i-1)/2
@@ -23,13 +23,13 @@ struct Heap{
         return ((2*i)+2);
     }
     
-    // A: array, i: índice
+    // i: índice del nodo donde se hará heapify
     void heapify(int i){
         int l = left(i);
         int r = right(i);
         int min = i;
         // Si el hijo izquierdo está dentro del heap y es menor que el actual
-        if((l >= par.size()) && (get<0>(par[l]) < get<0>(par[min]))){
+        if((l >= pares.size()) && (get<0>(pares[l]) < get<0>(pares[min]))){
             // El hijo izquierdo es más pequeño
             min = l;
         } else {
@@ -37,25 +37,32 @@ struct Heap{
             min = i;
         }
         // Si el hijo derecho está dentro del heap y es menor que el actual
-        if ((r <= par.size()) && (get<0>(par[r]) < get<0>(par[min]))){
+        if ((r <= pares.size()) && (get<0>(pares[r]) < get<0>(pares[min]))){
             min = r;
         }
         // Si el minimo es distinto que al inicio
         if (min != i){
             // Se debe intercambiar par[i] con el nuevo mínimo
-            swap(par[i], par[min]);
+            swap(pares[i], pares[min]);
             // Y llamamos a heapify de su hijo por si esto causó conflicto
             heapify(min);
         }      
     }
 
+    void insertHeap(tuple<double, Node> nuevoPar){
+        // Se inserta el nuevo par al final
+        pares.push_back(nuevoPar);
+        // Como lo anterior puede romper la estructura, se hace heapify
+        heapify(get<1>(nuevoPar).id);
+    }
+
     tuple<double, Node> extractMin(){
         // El mínimo es el primer elemento en la cola de prioridad
-        tuple<double, Node> min = par[0];
+        tuple<double, Node> min = pares[0];
         // Intercambiamos el primer por el último elemento
-        par[0] = par.back();
+        pares[0] = pares.back();
         // Eliminamos el elemento que queremos extraer
-        par.pop_back();
+        pares.pop_back();
         // Lo anterior puede haber roto la condición del Heap, así que se llama a Heapify sobre su primer elemento
         heapify(0);
         // Retornamos el elemento menor
@@ -65,12 +72,12 @@ struct Heap{
     // Recibe el índice y el valor que se desea colocar en él
     void decreaseKey(int i, double k){
         // Se cambia el valor del índice i por k
-        get<0>(par[i]) = k;
+        get<0>(pares[i]) = k;
         // Lo anterior puede haber roto la condición del Heap, así que se revisará toda la rama hacia arriba
         // Mientras el elemento i tenga un padre y el valor del padre sea mayor que el de i
-        while ((i > 1) && (get<0>(par[parent(i)]) > get<0>(par[i]))){
+        while ((i > 1) && (get<0>(pares[parent(i)]) > get<0>(pares[i]))){
             // Se intercambia la posición del elemento i y su padre
-            swap(par[i], par[parent(i)]);
+            swap(pares[i], pares[parent(i)]);
             // Se revisa nuevamente hacia arriba
             i = parent(i);
         }

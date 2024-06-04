@@ -14,8 +14,8 @@ struct Edge {
 
 // Definición de un nodo
 struct Node {
-    int id;                                   // Identificación del nodo (no necesariamente es un número)
-    std::map<int, std::vector<Edge>> matrix;  // El int identifica al nodo, el vector contiene las aristas
+    int id;                             // Identificación del nodo (no necesariamente es un número)
+    std::map<int, Edge> neighbors;      // El int identifica al nodo vecino, edge identifica el arista entre el nodo y su vecino
 
     // Constructor por defecto necesario para std::map
     Node() : id(-1) {}
@@ -34,7 +34,9 @@ struct Graph {
 
     // Agregar una arista al grafo
     void addEdge(int start, int end, double weight) {
-        nodes[start].matrix[end].emplace_back(start, end, weight);
+        nodes[start].neighbors[end].start = start;
+        nodes[start].neighbors[end].end = end;
+        nodes[start].neighbors[end].weight = weight;
     }
 };
 

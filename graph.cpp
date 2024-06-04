@@ -2,6 +2,7 @@
 #include <random>
 #include <vector>
 #include <map>
+using namespace std;
 
 // Definición de una arista
 struct Edge {
@@ -15,7 +16,7 @@ struct Edge {
 // Definición de un nodo
 struct Node {
     int id;                             // Identificación del nodo (no necesariamente es un número)
-    std::map<int, Edge> neighbors;      // El int identifica al nodo vecino, edge identifica el arista entre el nodo y su vecino
+    map<int, Edge> neighbors;      // El int identifica al nodo vecino, edge identifica el arista entre el nodo y su vecino
 
     // Constructor por defecto necesario para std::map
     Node() : id(-1) {}
@@ -25,7 +26,7 @@ struct Node {
 
 // Definición de un grafo
 struct Graph {
-    std::map<int, Node> nodes; // Mapa de nodos por su identificación
+    map<int, Node> nodes; // Mapa de nodos por su identificación
 
     // Agregar un nodo al grafo
     void addNode(int id) {
@@ -42,8 +43,8 @@ struct Graph {
 
 Graph construirGrafo(int numeroi, int numeroj){
     // Para generar pesos aleatorios y uniformes dentro del rango (0..1]
-    std::mt19937 gen(std::random_device{}());
-    std::uniform_real_distribution<double> distribucion(0.0, 1.0);
+    mt19937 gen(random_device{}());
+    uniform_real_distribution<double> distribucion(0.0, 1.0);
 
     Graph grafo;
 
@@ -54,14 +55,14 @@ Graph construirGrafo(int numeroi, int numeroj){
 
     // Para cada nodo i, se lo conecta con un nodo aleatorio elegido en [1..i −1]
     for(int i=1; i<numeroi; i++){
-        std::uniform_int_distribution<> dis1(0, i-1);
+        uniform_int_distribution<> dis1(0, i-1);
         grafo.addEdge(grafo.nodes[i].id, grafo.nodes[dis1(gen)].id, distribucion(gen));
     }
     // Saliendo de este for se garantiza la conectividad
 
     // Añadir las 2^j − (v −1) aristas restantes
     for(int j=0; j<(pow(2,numeroj)-(numeroi-1)); j++){
-        std::uniform_int_distribution<> dis2(0, numeroi);
+        uniform_int_distribution<> dis2(0, numeroi);
         int nodo1 = grafo.nodes[dis2(gen)].id;
         int nodo2 = grafo.nodes[dis2(gen)].id;
         // Para que no sean el mismo nodo(?

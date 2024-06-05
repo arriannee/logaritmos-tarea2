@@ -91,7 +91,7 @@ struct Heap{
         get<0>(pares[i]) = k;
         // Lo anterior puede haber roto la condición del Heap, así que se revisará toda la rama hacia arriba
         // Mientras el elemento i tenga un padre y el valor del padre sea mayor que el de i
-        while ((i > 1) && (get<0>(pares[parent(i)]) > get<0>(pares[i]))){
+        while ((i >= 1) && (get<0>(pares[parent(i)]) > get<0>(pares[i]))){
             // Se intercambia la posición del elemento i y su padre
             swap(pares[i], pares[parent(i)]);
             // Se revisa nuevamente hacia arriba

@@ -35,10 +35,11 @@ void dijkstraWithHeap(Graph& graph, int raiz){
             double distanciasU = distancias[u.first];
             double distanciasV = distancias[get<1>(dv).id];
             double aristaUV = u.second.weight;
+            double alt = distanciasV + aristaUV;
             // Si la distancia guardada para u (distancias[u]) es mayor a la distancia guardada para v (distancias[v]) más el peso de la arista (u, v) 
-            if (distanciasU > (distanciasV + aristaUV)){
+            if (distanciasU > alt){
                 // actualizamos el valor de la distancia de u, 
-                distancias[u.first] = (distanciasV + aristaUV);
+                distancias[u.first] = alt;
                 // guardamos v como el nodo previo de u y 
                 previos[u.first] =  get<1>(dv).id;
                 // actualizamos la distancia del par que representa al nodo u en Q utilizando decreaseKey

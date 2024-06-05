@@ -1,9 +1,10 @@
-#include "graph.cpp"
+#include "graphT.cpp"
 #include <tuple>
 #include <limits>
 
 
 struct Heap{
+    // Par (distancia, nodo)
     vector<tuple<double, Node>> pares;
 
     // Se tiene en la estructura de un heap, siendo i el índice de un nodo:
@@ -22,37 +23,55 @@ struct Heap{
         return ((2*i)+2);
     }
     
+    // El siguiente es un heapify que revisa hacia abajo
     // i: índice del nodo donde se hará heapify
-    void heapify(int i){
+    void heapify1(int i){
         int l = left(i);
         int r = right(i);
         int min = i;
+        
         // Si el hijo izquierdo está dentro del heap y es menor que el actual
-        if((l >= pares.size()) && (get<0>(pares[l]) < get<0>(pares[min]))){
+        if((l < pares.size()) && (get<0>(pares[l]) < get<0>(pares[min]))){
             // El hijo izquierdo es más pequeño
             min = l;
         } else {
             // Si no, el actual es más pequeño
             min = i;
-        }
+        }       
         // Si el hijo derecho está dentro del heap y es menor que el actual
-        if ((r <= pares.size()) && (get<0>(pares[r]) < get<0>(pares[min]))){
+        if ((r < pares.size()) && (get<0>(pares[r]) < get<0>(pares[min]))){
             min = r;
-        }
+        }     
         // Si el minimo es distinto que al inicio
         if (min != i){
             // Se debe intercambiar par[i] con el nuevo mínimo
             swap(pares[i], pares[min]);
             // Y llamamos a heapify de su hijo por si esto causó conflicto
-            heapify(min);
-        }      
+            heapify1(min); 
+        }    
+    }
+
+    // El siguiente es un heapify que revisa hacia arriba
+    // i: índice del nodo donde se hará heapify
+    void heapify2(int i){
+        int p = parent(i);
+        // Si el padre está dentro del vector
+        if(p >= 0) {
+            // Si el valor actual es menor que el del padre
+            if(get<0>(pares[i]) < get<0>(pares[p])){
+                // Se debe intercambiar el actual por el padre
+                swap(pares[i], pares[p]);
+                // Llamamos a heapify de su padre por si esto causó conflicto
+                heapify2(p);
+            }
+        }
     }
 
     void insertHeap(tuple<double, Node> nuevoPar){
         // Se inserta el nuevo par al final
         pares.push_back(nuevoPar);
         // Como lo anterior puede romper la estructura, se hace heapify
-        heapify(get<1>(nuevoPar).id);
+        heapify2(get<1>(nuevoPar).id);
     }
 
     tuple<double, Node> extractMin(){
@@ -63,7 +82,7 @@ struct Heap{
         // Eliminamos el elemento que queremos extraer
         pares.pop_back();
         // Lo anterior puede haber roto la condición del Heap, así que se llama a Heapify sobre su primer elemento
-        heapify(0);
+        heapify1(0);
         // Retornamos el elemento menor
         return min;
     }

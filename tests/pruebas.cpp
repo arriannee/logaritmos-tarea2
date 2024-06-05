@@ -37,6 +37,18 @@ int main() {
         cout << "elemento:" << precio << endl;
     }
 
+    cout << "Se realiza extractMin" << endl;
+
+    Q.extractMin();
+
+    cout << "Valores después extractMin" << endl;
+
+    for(auto elemento : Q.pares){
+        double precio = get<0>(elemento);
+        cout << "elemento:" << precio << endl;
+    }
+
+    /*
     // Puntero a algún nodo
     tuple<double, Node>* ptr = &Q.pares[3];
 
@@ -52,6 +64,7 @@ int main() {
         double precio = get<0>(elemento);
         cout << "elemento:" << precio << endl;
     }
+    */
 
     return 0;
 }

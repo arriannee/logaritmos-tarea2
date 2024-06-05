@@ -71,7 +71,7 @@ struct Heap{
         // Se inserta el nuevo par al final
         pares.push_back(nuevoPar);
         // Como lo anterior puede romper la estructura, se hace heapify
-        heapify2(get<1>(nuevoPar).id);
+        heapify2(pares.size()-1);
     }
 
     tuple<double, Node> extractMin(){

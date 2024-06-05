@@ -24,7 +24,7 @@ struct Heap{
     
     // El siguiente es un heapify que revisa hacia abajo
     // i: índice del nodo donde se hará heapify
-    void heapify1(int i){
+    void heapify1(Graph grafo, int i){
         int l = left(i);
         int r = right(i);
         int min = i;
@@ -41,17 +41,22 @@ struct Heap{
             min = r;
         }
         // Si el minimo es distinto que al inicio
-        if (min != i){
+        if (min != i){      
             // Se debe intercambiar par[i] con el nuevo mínimo
             swap(pares[i], pares[min]);
+            // Se intercambian los punteros de los nodos que los representan
+            int idActual = get<1>(pares[i]).id;
+            int idHijo = get<1>(pares[min]).id;
+            grafo.nodes[idActual].par = &pares[min];
+            grafo.nodes[idHijo].par = &pares[i];
             // Y llamamos a heapify de su hijo por si esto causó conflicto
-            heapify1(min);
+            heapify1(grafo, min);
         }      
     }
 
     // El siguiente es un heapify que revisa hacia arriba
     // i: índice del nodo donde se hará heapify
-    void heapify2(int i){
+    void heapify2(Graph grafo, int i){
         int p = parent(i);
         // Si el padre está dentro del vector
         if(p >= 0) {
@@ -59,41 +64,60 @@ struct Heap{
             if(get<0>(pares[i]) < get<0>(pares[p])){
                 // Se debe intercambiar el actual por el padre
                 swap(pares[i], pares[p]);
+                // Se intercambian los punteros de los nodos que los representan
+                int idActual = get<1>(pares[i]).id;
+                int idPadre = get<1>(pares[p]).id;
+                grafo.nodes[idActual].par = &pares[p];
+                grafo.nodes[idPadre].par = &pares[i];
                 // Llamamos a heapify de su padre por si esto causó conflicto
-                heapify2(p);
+                heapify2(grafo, p);
             }
         }
     }
 
-    void insertHeap(tuple<double, Node> nuevoPar){
+    void insertHeap(Graph grafo, tuple<double, Node> nuevoPar){
         // Se inserta el nuevo par al final
         pares.push_back(nuevoPar);
+        // El puntero del nodo apuntará al último elemento de Q (el que se acaba de insertar)
+        int idActual = get<1>(nuevoPar).id;
+        grafo.nodes[idActual].par = &pares[pares.size() - 1];
         // Como lo anterior puede romper la estructura, se hace heapify
-        heapify2(get<1>(nuevoPar).id);
+        heapify2(grafo, pares.size()-1);
     }
 
-    tuple<double, Node> extractMin(){
+    tuple<double, Node> extractMin(Graph grafo){
         // El mínimo es el primer elemento en la cola de prioridad
         tuple<double, Node> min = pares[0];
         // Intercambiamos el primer por el último elemento
         pares[0] = pares.back();
         // Eliminamos el elemento que queremos extraer
         pares.pop_back();
+        // Se elimina el puntero del elemento mínimo y se actualiza el puntero del último
+        int idMin = get<1>(pares[0]).id;
+        int idLast = get<1>(pares.back()).id;
+        grafo.nodes[idMin].par = NULL;
+        grafo.nodes[idLast].par = &pares[0];
         // Lo anterior puede haber roto la condición del Heap, así que se llama a Heapify sobre su primer elemento
-        heapify1(0);
+        heapify1(grafo, 0);
         // Retornamos el elemento menor
         return min;
     }
 
     // Recibe el índice y el valor que se desea colocar en él
-    void decreaseKey(int i, double k){
+    void decreaseKey(Graph grafo, int i, double k){
         // Se cambia el valor del índice i por k
         get<0>(pares[i]) = k;
-        // Lo anterior puede haber roto la condición del Heap, así que se revisará toda la rama hacia arriba
+        // Lo anterior puede haber roto la condición del Heap, así que se revisará toda la rama hacia arriba    
         // Mientras el elemento i tenga un padre y el valor del padre sea mayor que el de i
         while ((i >= 1) && (get<0>(pares[parent(i)]) > get<0>(pares[i]))){
+            int parentIndex = parent(i);
             // Se intercambia la posición del elemento i y su padre
-            swap(pares[i], pares[parent(i)]);
+            swap(pares[i], pares[parentIndex]);
+            // Se intercambian los punteros
+            int idActual = get<1>(pares[i]).id;
+            int idParent = get<1>(pares[parentIndex]).id;
+            grafo.nodes[idActual].par = &pares[parentIndex];
+            grafo.nodes[idParent].par = &pares[i];
             // Se revisa nuevamente hacia arriba
             i = parent(i);
         }

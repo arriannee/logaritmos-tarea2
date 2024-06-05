@@ -16,7 +16,8 @@ struct Edge {
 // Definición de un nodo
 struct Node {
     int id;                             // Identificación del nodo (no necesariamente es un número)
-    map<int, Edge> neighbors;      // El int identifica al nodo vecino, edge identifica el arista entre el nodo y su vecino
+    map<int, Edge> neighbors;           // El int identifica al nodo vecino, edge identifica el arista entre el nodo y su vecino
+    vector<tuple<double, Node>>* par;   // Puntero al par en la estructura Q que lo representa
 
     // Constructor por defecto necesario para std::map
     Node() : id(-1) {}

@@ -31,17 +31,23 @@ void dijkstraWithHeap(Graph& graph, int raiz){
         // Obtenemos el par (d, v) con menor distancia en Q y lo eliminamos.
         tuple<double, Node> dv = Q.extractMin();
         // Por cada vecino u del nodo v:
-        for(const auto& u : graph.nodes[get<1>(dv).id].matrix){
+        for(const auto& u : graph.nodes[get<1>(dv).id].neighbors){
+            double distanciasU = distancias[u.first];
+            double distanciasV = distancias[get<1>(dv).id];
+            double aristaUV = u.second.weight;
             // Si la distancia guardada para u (distancias[u]) es mayor a la distancia guardada para v (distancias[v]) más el peso de la arista (u, v) 
+            if (distanciasU > (distanciasV + aristaUV)){
                 // actualizamos el valor de la distancia de u, 
-                    
+                distancias[u.first] = (distanciasV + aristaUV);
                 // guardamos v como el nodo previo de u y 
-                    
+                previos[u.first] =  get<1>(dv).id;
                 // actualizamos la distancia del par que representa al nodo u en Q utilizando decreaseKey
+            }
         }
     }
     
     // 7. Retornamos el arreglo de previos y distancias.
+    return;
 }
 
     

@@ -30,28 +30,28 @@ int main() {
     Q.insertHeap(par4);
     Q.insertHeap(par5);
 
+    cout << "Valores originales:" << endl;
+
     for(auto elemento : Q.pares){
         double precio = get<0>(elemento);
         cout << "elemento:" << precio << endl;
     }
 
-    /*
-    std::vector<int> vec = {10, 20, 30, 40, 50};
-    
-    // Obtener un puntero a uno de los elementos del vector
-    int* ptr = &vec[2];  // ptr apunta al elemento 30
+    // Puntero a algún nodo
+    tuple<double, Node>* ptr = &Q.pares[3];
 
-    // Mostrar el valor original
-    std::cout << "Valor original en vec[2]: " << vec[2] << std::endl;
+    ptrdiff_t index = ptr - &Q.pares[0];
 
-    // Editar el valor al que apunta ptr
-    *ptr = 123123;
+    cout << "El índice debería ser 3 y es: " << index << endl;
 
-    // Mostrar el vector modificado
-    for(int i=0; i<vec.size(); i++){
-        std::cout << "Valor " << i << " del vector es " << vec[i] << std::endl;
+    cout << "Valores después de decreaseKey" << endl;
+
+    Q.decreaseKey(index, 123);
+
+    for(auto elemento : Q.pares){
+        double precio = get<0>(elemento);
+        cout << "elemento:" << precio << endl;
     }
-    */
 
     return 0;
 }

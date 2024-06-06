@@ -4,7 +4,6 @@
 #include <unordered_map>
 #include <limits>
 #include <cmath>
-#include <algorithm>
 
 #include "graph.cpp"
 
@@ -15,11 +14,12 @@ struct FibonacciNode {
     int id;
     double key;
     FibonacciNode* parent;
-    FibonacciNode* child;
+    FibonacciNode* child; // Si el nodo tiene varios hijos, uno de ellos se considera el hijo directo y 
+                          // los demás están conectados en una lista circular doblemente enlazada.
     FibonacciNode* left;
     FibonacciNode* right;
-    int degree;
-    bool mark;
+    int degree; // Número de hijos.
+    bool mark;  // Para marcar los nodos que han perdido un hijo desde que se convirtieron en hijos de otro nodo.
 
     FibonacciNode(int id, double key)
         : id(id), key(key), parent(nullptr), child(nullptr),
@@ -53,6 +53,7 @@ struct FibonacciHeap {
     }
 
     void cut(FibonacciNode* x, FibonacciNode* y) {
+        // Remover x de la lista de hijos de y
         if (x->right == x) {
             y->child = nullptr;
         } else {
@@ -62,18 +63,23 @@ struct FibonacciHeap {
                 y->child = x->right;
             }
         }
+        // Decrementando y.degree
         --y->degree;
 
+        // Agregar x a la lista de raíces de H
         x->parent = nullptr;
         x->left = minNode;
         x->right = minNode->right;
         minNode->right->left = x;
         minNode->right = x;
+
+        // Resetear el marcador de x
         x->mark = false;
     }
 
     void cascadingCut(FibonacciNode* y) {
         FibonacciNode* z = y->parent;
+
         if (z != nullptr) {
             if (!y->mark) {
                 y->mark = true;
@@ -84,26 +90,28 @@ struct FibonacciHeap {
         }
     }
 
-     void decreaseKey(FibonacciNode* x, double k) {
+    void decreaseKey(FibonacciNode* x, int k) {
         if (k > x->key) {
-            std::cerr << "New key is greater than current key.\n";
-            return;
+            // error “new key is greater than current key”
+            std::cout << "New key is greater than current key. \n" << std::endl;
         }
         x->key = k;
 
         FibonacciNode* y = x->parent;
+
         if (y != nullptr && x->key < y->key) {
             cut(x, y);
             cascadingCut(y);
         }
-        if (x->key < minNode->key) {
+        if (x->key < minNode->key) { // (x->key < extractMin()->key) ?
             minNode = x;
         }
-        cout << "decreaseKey: Nodo " << x->id << " actualizado a " << k << endl;
     }
 
+    // Pág. 513
     FibonacciNode* extractMin() {
         FibonacciNode* z = minNode;
+
         if (z != nullptr) {
             if (z->child != nullptr) {
                 FibonacciNode* x = z->child;
@@ -115,10 +123,12 @@ struct FibonacciHeap {
                     minNode->right = x;
                     x->parent = nullptr;
                     x = next;
-                } while (x != z->child);
+                } while (x != z->child); // for each child x of z.
             }
             z->left->right = z->right;
             z->right->left = z->left;
+
+            // Linea 7
             if (z == z->right) {
                 minNode = nullptr;
             } else {
@@ -127,29 +137,30 @@ struct FibonacciHeap {
             }
             --nodeCount;
         }
-        cout << "extractMin: Nodo " << z->id << " extraído" << endl;
         return z;
     }
 
     void consolidate() {
-        int D = static_cast<int>(std::log2(nodeCount)) + 1;
+        int D = static_cast<int>(std::log2(nodeCount)); // Pág. 5009 (Revisar)
         vector<FibonacciNode*> A(D, nullptr);
         vector<FibonacciNode*> rootNodes;
         FibonacciNode* x = minNode;
 
+        // Evitar el caso vacío
         if (x != nullptr) {
             do {
                 rootNodes.push_back(x);
                 x = x->right;
             } while (x != minNode);
 
+            // for each node w in the root list of H
             for (FibonacciNode* w : rootNodes) {
                 x = w;
                 int d = x->degree;
                 while (A[d] != nullptr) {
-                    FibonacciNode* y = A[d];
+                    FibonacciNode* y = A[d]; // another node with the same degree as x
                     if (x->key > y->key) {
-                        swap(x, y);
+                        swap(x, y); // exchange x with y
                     }
                     link(y, x);
                     A[d] = nullptr;
@@ -165,7 +176,9 @@ struct FibonacciHeap {
                         minNode = y;
                         minNode->left = minNode;
                         minNode->right = minNode;
-                    } else {
+                    } else { // insert A[i] (y) into H’s root list
+                        y->left->right = y->right;
+                        y->right->left = y->left;
                         y->left = minNode;
                         y->right = minNode->right;
                         minNode->right->left = y;
@@ -177,24 +190,30 @@ struct FibonacciHeap {
                 }
             }
         }
-        cout << "consolidate: Consolidación completada" << endl;
     }
 
     void link(FibonacciNode* y, FibonacciNode* x) {
+        // remove y from the root list of H
         y->left->right = y->right;
         y->right->left = y->left;
         y->parent = x;
-        if (x->child == nullptr) {
+
+        // make y a child of x, 
+        if (x->child == nullptr) { // Si no tiene hijos
             x->child = y;
             y->right = y;
             y->left = y;
-        } else {
-            y->left = x->child;
+        } else { // Si sí
+            y->left = x->child; // El puntero left de y apunta al primer hijo de x
             y->right = x->child->right;
             x->child->right->left = y;
             x->child->right = y;
         }
+        // incrementing x->degree
         ++x->degree;
         y->mark = false;
     }
+
+    // Falta UNION, pero por efectos de la tarea pareciera no ser necesario
+    // MININUM es dado por el puntero minNode
 };

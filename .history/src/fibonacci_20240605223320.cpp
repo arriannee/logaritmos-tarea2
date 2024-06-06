@@ -84,7 +84,7 @@ struct FibonacciHeap {
         }
     }
 
-     void decreaseKey(FibonacciNode* x, double k) {
+    void decreaseKey(FibonacciNode* x, double k) {
         if (k > x->key) {
             std::cerr << "New key is greater than current key.\n";
             return;
@@ -189,12 +189,4 @@ struct FibonacciHeap {
             y->right = y;
             y->left = y;
         } else {
-            y->left = x->child;
-            y->right = x->child->right;
-            x->child->right->left = y;
-            x->child->right = y;
-        }
-        ++x->degree;
-        y->mark = false;
-    }
-};
+            y->

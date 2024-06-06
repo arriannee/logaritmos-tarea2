@@ -4,11 +4,8 @@
 #include <unordered_map>
 #include <limits>
 #include <cmath>
-#include <algorithm>
 
 #include "graph.cpp"
-
-using namespace std;
 
 // Nodo de la cola de Fibonacci
 struct FibonacciNode {
@@ -53,6 +50,7 @@ struct FibonacciHeap {
     }
 
     void cut(FibonacciNode* x, FibonacciNode* y) {
+        // Remover x de la lista de hijos de y
         if (x->right == x) {
             y->child = nullptr;
         } else {
@@ -62,18 +60,23 @@ struct FibonacciHeap {
                 y->child = x->right;
             }
         }
+        // Decrementando y.degree
         --y->degree;
 
+        // Agregar x a la lista de raíces de H
         x->parent = nullptr;
         x->left = minNode;
         x->right = minNode->right;
         minNode->right->left = x;
         minNode->right = x;
+
+        // Resetear el marcador de x
         x->mark = false;
     }
 
     void cascadingCut(FibonacciNode* y) {
         FibonacciNode* z = y->parent;
+
         if (z != nullptr) {
             if (!y->mark) {
                 y->mark = true;
@@ -84,26 +87,28 @@ struct FibonacciHeap {
         }
     }
 
-     void decreaseKey(FibonacciNode* x, double k) {
+    void decreaseKey(FibonacciNode* x, int k) {
         if (k > x->key) {
-            std::cerr << "New key is greater than current key.\n";
-            return;
+            // error “new key is greater than current key”
+            std::cout << "New key is greater than current key. \n" << std::endl;
         }
         x->key = k;
 
         FibonacciNode* y = x->parent;
+
         if (y != nullptr && x->key < y->key) {
             cut(x, y);
             cascadingCut(y);
         }
-        if (x->key < minNode->key) {
+        if (x->key < minNode->key) { // (x->key < extractMin()->key) ?
             minNode = x;
         }
-        cout << "decreaseKey: Nodo " << x->id << " actualizado a " << k << endl;
     }
 
+    // Pág. 513
     FibonacciNode* extractMin() {
         FibonacciNode* z = minNode;
+
         if (z != nullptr) {
             if (z->child != nullptr) {
                 FibonacciNode* x = z->child;
@@ -115,10 +120,12 @@ struct FibonacciHeap {
                     minNode->right = x;
                     x->parent = nullptr;
                     x = next;
-                } while (x != z->child);
+                } while (x != z->child); // for each child x of z.
             }
             z->left->right = z->right;
             z->right->left = z->left;
+
+            // Linea 7
             if (z == z->right) {
                 minNode = nullptr;
             } else {
@@ -127,16 +134,15 @@ struct FibonacciHeap {
             }
             --nodeCount;
         }
-        cout << "extractMin: Nodo " << z->id << " extraído" << endl;
         return z;
     }
 
     void consolidate() {
-        int D = static_cast<int>(std::log2(nodeCount)) + 1;
-        vector<FibonacciNode*> A(D, nullptr);
-        vector<FibonacciNode*> rootNodes;
+        int D = static_cast<int>(std::log2(nodeCount)); // Pág. 523
+        std::vector<FibonacciNode*> A(D, nullptr);
+        std::vector<FibonacciNode*> rootNodes;
+        
         FibonacciNode* x = minNode;
-
         if (x != nullptr) {
             do {
                 rootNodes.push_back(x);
@@ -149,7 +155,7 @@ struct FibonacciHeap {
                 while (A[d] != nullptr) {
                     FibonacciNode* y = A[d];
                     if (x->key > y->key) {
-                        swap(x, y);
+                        std::swap(x, y);
                     }
                     link(y, x);
                     A[d] = nullptr;
@@ -163,9 +169,9 @@ struct FibonacciHeap {
                 if (y != nullptr) {
                     if (minNode == nullptr) {
                         minNode = y;
-                        minNode->left = minNode;
-                        minNode->right = minNode;
                     } else {
+                        y->left->right = y->right;
+                        y->right->left = y->left;
                         y->left = minNode;
                         y->right = minNode->right;
                         minNode->right->left = y;
@@ -177,7 +183,6 @@ struct FibonacciHeap {
                 }
             }
         }
-        cout << "consolidate: Consolidación completada" << endl;
     }
 
     void link(FibonacciNode* y, FibonacciNode* x) {

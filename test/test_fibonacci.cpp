@@ -100,9 +100,9 @@ void testDecreaseKey() {
 
     // Verificar si el nodo mínimo es el esperado
     if (fibHeap.minNode->id == 3) {
-        std::cout << "Test OK!: el nodo mínimo es el correcto después de decreaseKey." << std::endl;
+        std::cout << "Test OK!: el nodo minimo es el correcto despues de decreaseKey." << std::endl;
     } else {
-        std::cout << "Test FAIL!: el nodo mínimo no es el esperado después de decreaseKey." << std::endl;
+        std::cout << "Test FAIL!: el nodo minimo no es el esperado despues de decreaseKey." << std::endl;
     }
 }
 

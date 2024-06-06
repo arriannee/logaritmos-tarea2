@@ -26,6 +26,73 @@ struct Node {
     Node(int id) : id(id) {}
 };
 
+bool dfs(int v, int parent, set<int>& visited, const Graph& graph) {
+    visited.insert(v);
+    for (const auto& neighbor : graph.nodes.at(v).neighbors) {
+        int u = neighbor.first;
+        if (u == parent) {
+            continue;
+        }
+        if (visited.count(u)) {
+            return true;
+        }
+        if (dfs(u, v, visited, graph)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool hasCycle(const Graph& graph) {
+    set<int> visited;
+    for (const auto& node : graph.nodes) {
+        if (!visited.count(node.first)) {
+            if (dfs(node.first, -1, visited, graph)) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+Graph construirGrafo(int numeroi, int numeroj) {
+    mt19937 gen(random_device{}());
+    uniform_real_distribution<double> distribucion(0.0, 1.0);
+
+    Graph grafo;
+    int numNodos = pow(2, numeroi);
+    for (int i = 0; i < numNodos; i++) {
+        grafo.addNode(i);
+    }
+
+    for (int i = 1; i < numNodos; i++) {
+        uniform_int_distribution<> dis1(0, i - 1);
+        grafo.addEdge(grafo.nodes[i].id, grafo.nodes[dis1(gen)].id, distribucion(gen));
+    }
+
+    int totalAristas = pow(2, numeroj);
+    for (int j = 0; j < totalAristas; j++) {
+        uniform_int_distribution<> dis2(0, numNodos - 1);
+        int nodo1 = grafo.nodes[dis2(gen)].id;
+        int nodo2 = grafo.nodes[dis2(gen)].id;
+        while (nodo1 == nodo2) {
+            nodo2 = grafo.nodes[dis2(gen)].id;
+        }
+        grafo.addEdge(grafo.nodes[nodo1].id, grafo.nodes[nodo2].id, distribucion(gen));
+    }
+
+    std::cout << "Grafo construido" << std::endl;
+
+    if (hasCycle(grafo)) {
+        std::cout << "El grafo tiene ciclos." << std::endl;
+    } else {
+        std::cout << "El grafo no tiene ciclos." << std::endl;
+    }
+
+    return grafo;
+}
+
+
 // Definición de un grafo
 struct Graph {
     map<int, Node> nodes; // Mapa de nodos por su identificación
@@ -84,14 +151,4 @@ Graph construirGrafo(int numeroi, int numeroj){
     std::cout << "Grafo construido" << std::endl;
     
     return grafo;
-}
-
-// Función para imprimir un grafo
-void imprimirGrafo(const Graph& grafo) {
-    for (const auto& node : grafo.nodes) {
-        cout << "Nodo " << node.first << ":\n";
-        for (const auto& neighbor : node.second.neighbors) {
-            cout << "  Vecino " << neighbor.first << " con peso " << neighbor.second.weight << "\n";
-        }
-    }
 }

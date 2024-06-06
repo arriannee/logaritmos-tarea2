@@ -85,13 +85,3 @@ Graph construirGrafo(int numeroi, int numeroj){
     
     return grafo;
 }
-
-// Función para imprimir un grafo
-void imprimirGrafo(const Graph& grafo) {
-    for (const auto& node : grafo.nodes) {
-        cout << "Nodo " << node.first << ":\n";
-        for (const auto& neighbor : node.second.neighbors) {
-            cout << "  Vecino " << neighbor.first << " con peso " << neighbor.second.weight << "\n";
-        }
-    }
-}

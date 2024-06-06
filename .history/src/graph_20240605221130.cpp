@@ -59,10 +59,7 @@ Graph construirGrafo(int numeroi, int numeroj){
     // Para cada nodo i, se lo conecta con un nodo aleatorio elegido en [0..i-1]
     for(int i = 1; i < numNodos; i++){
         uniform_int_distribution<> dis1(0, i-1);
-        int vecino = dis1(gen);
-        double peso = distribucion(gen);
-        grafo.addEdge(grafo.nodes[i].id, grafo.nodes[vecino].id, peso);
-        grafo.addEdge(grafo.nodes[vecino].id, grafo.nodes[i].id, peso);  // Añadir la arista en la dirección opuesta
+        grafo.addEdge(grafo.nodes[i].id, grafo.nodes[dis1(gen)].id, distribucion(gen));
     }
     // Saliendo de este for se garantiza la conectividad
 
@@ -76,22 +73,10 @@ Graph construirGrafo(int numeroi, int numeroj){
         while(nodo1 == nodo2){
             nodo2 = grafo.nodes[dis2(gen)].id;
         }
-        double peso = distribucion(gen);
-        grafo.addEdge(grafo.nodes[nodo1].id, grafo.nodes[nodo2].id, peso);
-        grafo.addEdge(grafo.nodes[nodo2].id, grafo.nodes[nodo1].id, peso);  // Añadir la arista en la dirección opuesta
+        grafo.addEdge(grafo.nodes[nodo1].id, grafo.nodes[nodo2].id, distribucion(gen));
     }
     
     std::cout << "Grafo construido" << std::endl;
     
     return grafo;
-}
-
-// Función para imprimir un grafo
-void imprimirGrafo(const Graph& grafo) {
-    for (const auto& node : grafo.nodes) {
-        cout << "Nodo " << node.first << ":\n";
-        for (const auto& neighbor : node.second.neighbors) {
-            cout << "  Vecino " << neighbor.first << " con peso " << neighbor.second.weight << "\n";
-        }
-    }
 }

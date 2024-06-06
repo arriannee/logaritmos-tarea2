@@ -84,7 +84,7 @@ struct FibonacciHeap {
         }
     }
 
-     void decreaseKey(FibonacciNode* x, double k) {
+    void decreaseKey(FibonacciNode* x, double k) {
         if (k > x->key) {
             std::cerr << "New key is greater than current key.\n";
             return;
@@ -99,7 +99,6 @@ struct FibonacciHeap {
         if (x->key < minNode->key) {
             minNode = x;
         }
-        cout << "decreaseKey: Nodo " << x->id << " actualizado a " << k << endl;
     }
 
     FibonacciNode* extractMin() {
@@ -127,7 +126,6 @@ struct FibonacciHeap {
             }
             --nodeCount;
         }
-        cout << "extractMin: Nodo " << z->id << " extraído" << endl;
         return z;
     }
 
@@ -177,7 +175,6 @@ struct FibonacciHeap {
                 }
             }
         }
-        cout << "consolidate: Consolidación completada" << endl;
     }
 
     void link(FibonacciNode* y, FibonacciNode* x) {

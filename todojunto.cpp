@@ -4,6 +4,7 @@
 #include <map>
 #include <tuple>
 #include <limits>
+
 using namespace std;
 
 // Definición de una arista
@@ -12,6 +13,7 @@ struct Edge {
     int end;        // Nodo de destino
     double weight;  // Peso de la arista
 
+    Edge() : start(-1), end(-1), weight(0.0) {} // Constructor por defecto
     Edge(int start, int end, double weight) : start(start), end(end), weight(weight) {}
 };
 
@@ -38,9 +40,7 @@ struct Graph {
 
     // Agregar una arista al grafo
     void addEdge(int start, int end, double weight) {
-        nodes[start].neighbors[end].start = start;
-        nodes[start].neighbors[end].end = end;
-        nodes[start].neighbors[end].weight = weight;
+        nodes[start].neighbors[end] = Edge(start, end, weight);
     }
 };
 
@@ -51,32 +51,53 @@ Graph construirGrafo(int numeroi, int numeroj){
 
     Graph grafo;
 
-    // Añadimos 2^i nodos al grafo
-    for(int i=0; i<numeroi; i++){
+    // Añadimos 2^numeroi nodos al grafo
+    int numNodos = pow(2, numeroi);
+    for(int i = 0; i < numNodos; i++){
         grafo.addNode(i);
     }
 
-    // Para cada nodo i, se lo conecta con un nodo aleatorio elegido en [1..i −1]
-    for(int i=1; i<numeroi; i++){
+    // Para cada nodo i, se lo conecta con un nodo aleatorio elegido en [0..i-1]
+    for(int i = 1; i < numNodos; i++){
         uniform_int_distribution<> dis1(0, i-1);
-        grafo.addEdge(grafo.nodes[i].id, grafo.nodes[dis1(gen)].id, distribucion(gen));
+        int vecino = dis1(gen);
+        double peso = distribucion(gen);
+        grafo.addEdge(i, vecino, peso);
+        grafo.addEdge(vecino, i, peso);  // Añadir la arista en la dirección opuesta
     }
     // Saliendo de este for se garantiza la conectividad
 
-    // Añadir las 2^j − (v −1) aristas restantes
-    for(int j=0; j<(pow(2,numeroj)-(numeroi-1)); j++){
-        uniform_int_distribution<> dis2(0, numeroi);
-        int nodo1 = grafo.nodes[dis2(gen)].id;
-        int nodo2 = grafo.nodes[dis2(gen)].id;
-        // Para que no sean el mismo nodo(?
+    // Añadir las 2^numeroj aristas adicionales
+    int totalAristas = pow(2, numeroj);
+    for(int j = 0; j < totalAristas; j++){
+        uniform_int_distribution<> dis2(0, numNodos - 1);
+        int nodo1 = dis2(gen);
+        int nodo2 = dis2(gen);
+        // Para que no sean el mismo nodo
         while(nodo1 == nodo2){
-            nodo2 = grafo.nodes[dis2(gen)].id;
+            nodo2 = dis2(gen);
         }
-        grafo.addEdge(grafo.nodes[nodo1].id, grafo.nodes[nodo2].id, distribucion(gen));
+        double peso = distribucion(gen);
+        grafo.addEdge(nodo1, nodo2, peso);
+        grafo.addEdge(nodo2, nodo1, peso);  // Añadir la arista en la dirección opuesta
     }
+    
+    std::cout << "Grafo construido" << std::endl;
+    
     return grafo;
 }
 
+// Función para imprimir un grafo
+void imprimirGrafo(const Graph& grafo) {
+    for (const auto& node : grafo.nodes) {
+        cout << "Nodo " << node.first << ":\n";
+        for (const auto& neighbor : node.second.neighbors) {
+            cout << "  Vecino " << neighbor.first << " con peso " << neighbor.second.weight << "\n";
+        }
+    }
+}
+
+// Definición de la estructura Heap
 struct Heap{
     vector<tuple<double, Node>> pares;
 
@@ -98,12 +119,12 @@ struct Heap{
     
     // El siguiente es un heapify que revisa hacia abajo
     // i: índice del nodo donde se hará heapify
-    void heapify1(Graph grafo, int i){
+    void heapify1(Graph& grafo, int i){
         int l = left(i);
         int r = right(i);
         int min = i;
         // Si el hijo izquierdo está dentro del heap y es menor que el actual
-        if((l >= pares.size()) && (get<0>(pares[l]) < get<0>(pares[min]))){
+        if((l < pares.size()) && (get<0>(pares[l]) < get<0>(pares[min]))){
             // El hijo izquierdo es más pequeño
             min = l;
         } else {
@@ -111,7 +132,7 @@ struct Heap{
             min = i;
         }
         // Si el hijo derecho está dentro del heap y es menor que el actual
-        if ((r <= pares.size()) && (get<0>(pares[r]) < get<0>(pares[min]))){
+        if ((r < pares.size()) && (get<0>(pares[r]) < get<0>(pares[min]))){
             min = r;
         }
         // Si el minimo es distinto que al inicio
@@ -130,7 +151,7 @@ struct Heap{
 
     // El siguiente es un heapify que revisa hacia arriba
     // i: índice del nodo donde se hará heapify
-    void heapify2(Graph grafo, int i){
+    void heapify2(Graph& grafo, int i){
         int p = parent(i);
         // Si el padre está dentro del vector
         if(p >= 0) {
@@ -149,7 +170,7 @@ struct Heap{
         }
     }
 
-    void insertHeap(Graph grafo, tuple<double, Node> nuevoPar){
+    void insertHeap(Graph& grafo, tuple<double, Node> nuevoPar){
         // Se inserta el nuevo par al final
         pares.push_back(nuevoPar);
         // El puntero del nodo apuntará al último elemento de Q (el que se acaba de insertar)
@@ -159,7 +180,7 @@ struct Heap{
         heapify2(grafo, pares.size()-1);
     }
 
-    tuple<double, Node> extractMin(Graph grafo){
+    tuple<double, Node> extractMin(Graph& grafo){
         // El mínimo es el primer elemento en la cola de prioridad
         tuple<double, Node> min = pares[0];
         // Intercambiamos el primer por el último elemento
@@ -167,18 +188,20 @@ struct Heap{
         // Eliminamos el elemento que queremos extraer
         pares.pop_back();
         // Se elimina el puntero del elemento mínimo y se actualiza el puntero del último
-        int idMin = get<1>(pares[0]).id;
-        int idLast = get<1>(pares.back()).id;
-        grafo.nodes[idMin].par = NULL;
-        grafo.nodes[idLast].par = &pares[0];
-        // Lo anterior puede haber roto la condición del Heap, así que se llama a Heapify sobre su primer elemento
-        heapify1(grafo, 0);
+        int idMin = get<1>(min).id;
+        grafo.nodes[idMin].par = nullptr;
+        if (!pares.empty()) {
+            int idLast = get<1>(pares[0]).id;
+            grafo.nodes[idLast].par = &pares[0];
+            // Lo anterior puede haber roto la condición del Heap, así que se llama a Heapify sobre su primer elemento
+            heapify1(grafo, 0);
+        }
         // Retornamos el elemento menor
         return min;
     }
 
     // Recibe el índice y el valor que se desea colocar en él
-    void decreaseKey(Graph grafo, int i, double k){
+    void decreaseKey(Graph& grafo, int i, double k){
         // Se cambia el valor del índice i por k
         get<0>(pares[i]) = k;
         // Lo anterior puede haber roto la condición del Heap, así que se revisará toda la rama hacia arriba    
@@ -193,64 +216,89 @@ struct Heap{
             grafo.nodes[idActual].par = &pares[parentIndex];
             grafo.nodes[idParent].par = &pares[i];
             // Se revisa nuevamente hacia arriba
-            i = parent(i);
+            i = parentIndex;
         }
     }
 };
 
-void dijkstraWithHeap(Graph& graph, int raiz){
-    // 1. Definimos dos arreglos de tamaño |V|, distancias y previos.
-    vector<double> distancias;
-    vector<int> previos;
+pair<vector<double>, vector<int>> dijkstraWithHeap(Graph& graph, int raiz) {
+    int n = graph.nodes.size();
     double infinito = numeric_limits<double>::infinity();
+    vector<double> distancias(n, numeric_limits<double>::infinity());
+    vector<int> previos(n, -1);
 
-    // 3. Definimos la distancia del nodo raíz como 0, su nodo previo como −1, 
+    // Definimos la distancia del nodo raíz como 0, su nodo previo como −1
     distancias[raiz] = 0;
     previos[raiz] = -1;
-    // y agregamos el par (distancia = 0, nodo = raíz) a Q.
+
+    // Estructura Heap
     Heap Q;
-    Node raiz(raiz);
-    tuple<double, Node> par(0, raiz);
+    Node raizNode(raiz);
+    tuple<double, Node> par(0.0, raizNode);
     Q.insertHeap(graph, par);
 
-    // 4. Por cada nodo v distinto de la raíz en el grafo:
-    for (const auto& node : graph.nodes){
-        // Definimos distancias[v] como infinita y previos[v] como indefinido.
-        distancias[node.first] = infinito;
-        previos[node.first] = -1;
-
-        // Agregamos el par (distancia = ∞, nodo = v) a Q.
-        tuple<double, Node> par(infinito, node.second);
-        Q.insertHeap(graph, par);
+    // Inicializamos el heap con los otros nodos
+    for (const auto& node : graph.nodes) {
+        if (node.first != raiz) {
+            tuple<double, Node> par(infinito, node.second);
+            Q.insertHeap(graph, par);
+        }
     }
 
-    // 6. Mientras Q no se encuentre vacío, repetimos:
-    while(!Q.pares.empty()){
+    // Mientras Q no se encuentre vacío, repetimos:
+    while (!Q.pares.empty()) {
         // Obtenemos el par (d, v) con menor distancia en Q y lo eliminamos.
         tuple<double, Node> dv = Q.extractMin(graph);
+        int v = get<1>(dv).id;
+
         // Por cada vecino u del nodo v:
-        for(const auto& u : graph.nodes[get<1>(dv).id].neighbors){
-            double distanciasU = distancias[u.first];
-            double distanciasV = distancias[get<1>(dv).id];
+        for (const auto& u : graph.nodes[v].neighbors) {
+            int u_id = u.first;
+            double distanciasU = distancias[u_id];
+            double distanciasV = distancias[v];
             double aristaUV = u.second.weight;
             double alt = distanciasV + aristaUV;
+
             // Si la distancia guardada para u (distancias[u]) es mayor a la distancia guardada para v (distancias[v]) más el peso de la arista (u, v) 
-            if (distanciasU > alt){
-                // actualizamos el valor de la distancia de u, 
-                distancias[u.first] = alt;
-                // guardamos v como el nodo previo de u y 
-                previos[u.first] =  get<1>(dv).id;
-                // actualizamos la distancia del par que representa al nodo u en Q utilizando decreaseKey
-                // El término graph.nodes[u.second.end].par es el puntero hacia el par que representa a u en la estructura Q
-                // La diferencia de punteros permite calcular el índice en el que se encuentra u dentro de Q
-                ptrdiff_t uIndex = graph.nodes[u.second.end].par - &Q.pares[0];
+            if (distanciasU > alt) {
+                // Actualizamos el valor de la distancia de u,
+                distancias[u_id] = alt;
+                // Guardamos v como el nodo previo de u 
+                previos[u_id] = v;
+                // Actualizamos la distancia del par que representa al nodo u en Q utilizando decreaseKey
+                ptrdiff_t uIndex = graph.nodes[u_id].par - &Q.pares[0];
                 Q.decreaseKey(graph, uIndex, alt);
             }
         }
     }
-    
-    // 7. Retornamos el arreglo de previos y distancias.
-    return;
+
+    // Retornamos el arreglo de previos y distancias.
+    return {distancias, previos};
 }
 
-    
+// Función para probar Dijkstra con cola de Fibonacci en un grafo grande
+void testDijkstraWithHeap() {
+    cout << "PRUEBA 1: 2^10 nodos, 2^12 aristas \n";
+    Graph grafo1 = construirGrafo(10, 12); // 10 nodos, 12 aristas
+    //imprimirGrafo(grafo1);
+    auto resultado = dijkstraWithHeap(grafo1, 0);
+
+    // Imprimir distancias
+    cout << "Distancias:\n";
+    for (size_t i = 0; i < resultado.first.size(); ++i) {
+        cout << "Nodo " << i << ": " << resultado.first[i] << "\n";
+    }
+
+    // Imprimir previos
+    cout << "Previos:\n";
+    for (size_t i = 0; i < resultado.second.size(); ++i) {
+        cout << "Nodo " << i << ": " << resultado.second[i] << "\n";
+    }
+
+}
+
+int main() {
+    testDijkstraWithHeap(); // Llamar a la función de prueba
+    cout << "FIN";
+    return 0;
+}

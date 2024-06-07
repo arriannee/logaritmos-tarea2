@@ -5,17 +5,14 @@
 #include <limits>
 #include <cmath>
 #include <algorithm>
+#include <memory>
+#include <fstream>
 
-#include "graph.cpp"
-
-using namespace std;
-
-// Nodo de la cola de Fibonacci
 struct FibonacciNode {
     int id;
     double key;
     FibonacciNode* parent;
-    FibonacciNode* child;
+    std::unique_ptr<FibonacciNode> child;
     FibonacciNode* left;
     FibonacciNode* right;
     int degree;
@@ -25,6 +22,7 @@ struct FibonacciNode {
         : id(id), key(key), parent(nullptr), child(nullptr),
           left(this), right(this), degree(0), mark(false) {}
 };
+
 
 // Cola de Fibonacci (H)
 struct FibonacciHeap {

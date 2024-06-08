@@ -21,12 +21,12 @@ struct Edge {
 struct Node {
     int id;                             // Identificación del nodo (no necesariamente es un número)
     map<int, Edge> neighbors;           // El int identifica al nodo vecino, edge identifica el arista entre el nodo y su vecino
-    tuple<double, Node>* par;           // Puntero al par en la estructura Q que lo representa
+    int Qpos;                           // Posición en el arreglo Q
 
     // Constructor por defecto necesario para std::map
-    Node() : id(-1), par(nullptr) {}
+    Node() : id(-1), Qpos(-1) {}
 
-    Node(int id) : id(id), par(nullptr) {}
+    Node(int id) : id(id), Qpos(-1) {}
 };
 
 // Definición de un grafo
@@ -120,7 +120,6 @@ struct Heap{
     // El siguiente es un heapify que revisa hacia abajo
     // i: índice del nodo donde se hará heapify
     void heapify1(Graph& grafo, int i){
-        cout << "heapify1" << endl;
         int l = left(i);
         int r = right(i);
         int min = i;
@@ -128,9 +127,6 @@ struct Heap{
         if((l < pares.size()) && (get<0>(pares[l]) < get<0>(pares[min]))){
             // El hijo izquierdo es más pequeño
             min = l;
-        } else {
-            // Si no, el actual es más pequeño
-            min = i;
         }
         // Si el hijo derecho está dentro del heap y es menor que el actual
         if ((r < pares.size()) && (get<0>(pares[r]) < get<0>(pares[min]))){
@@ -138,13 +134,13 @@ struct Heap{
         }
         // Si el minimo es distinto que al inicio
         if (min != i){    
-            // Se intercambian los punteros de los nodos que los representan 
-            int idActual = get<1>(pares[i]).id;
-            int idHijo = get<1>(pares[min]).id; 
-            grafo.nodes[idActual].par = &pares[min];
-            grafo.nodes[idHijo].par = &pares[i];
             // Se debe intercambiar par[i] con el nuevo mínimo
             swap(pares[i], pares[min]);      
+            // Actualizamos las Qpos de los nodos
+            int idi = get<1>(pares[i]).id;
+            int idmin = get<1>(pares[min]).id; 
+            grafo.nodes[idi].Qpos = i;
+            grafo.nodes[idmin].Qpos = min;
             // Y llamamos a heapify de su hijo por si esto causó conflicto
             heapify1(grafo, min);
         }      
@@ -158,13 +154,13 @@ struct Heap{
         if(p >= 0) {
             // Si el valor actual es menor que el del padre
             if(get<0>(pares[i]) < get<0>(pares[p])){  
-                // Se intercambian los punteros de los nodos que los representan        
-                int idActual = get<1>(pares[i]).id;
-                int idPadre = get<1>(pares[p]).id;
-                grafo.nodes[idActual].par = &pares[p];
-                grafo.nodes[idPadre].par = &pares[i];
                 // Se debe intercambiar el actual por el padre
                 swap(pares[i], pares[p]);
+                // Actualizamos las Qpos de los nodos
+                int idi = get<1>(pares[i]).id;
+                int idp = get<1>(pares[p]).id;
+                grafo.nodes[idi].Qpos = i;
+                grafo.nodes[idp].Qpos = p;
                 // Llamamos a heapify de su padre por si esto causó conflicto
                 heapify2(grafo, p);
             }
@@ -174,28 +170,27 @@ struct Heap{
     void insertHeap(Graph& grafo, tuple<double, Node> nuevoPar){
         // Se inserta el nuevo par al final
         pares.push_back(nuevoPar);
-        // El puntero del nodo apuntará al último elemento de Q (el que se acaba de insertar)
         int lastPair = pares.size() - 1;
-        grafo.nodes[get<1>(nuevoPar).id].par = &pares[lastPair];
+        // La posición del nuevo par en Q será el final del vector de pares
+        grafo.nodes[get<1>(nuevoPar).id].Qpos = lastPair;
         // Como lo anterior puede romper la estructura, se hace heapify
         heapify2(grafo, lastPair);
     }
 
     tuple<double, Node> extractMin(Graph& grafo){
-        cout << "extractMin" << endl;
         // El mínimo es el primer elemento en la cola de prioridad
         tuple<double, Node> min = pares[0];
-        // Se elimina el puntero del elemento mínimo
+        // Se elimina la posición del elemento que se va a extraer
         int idMin = get<1>(min).id;
-        grafo.nodes[idMin].par = nullptr;
+        grafo.nodes[idMin].Qpos = -1;
         // Intercambiamos el primer por el último elemento
         swap(pares[0], pares[pares.size()-1]);
         // Eliminamos el elemento que queremos extraer
         pares.pop_back();    
         if (!pares.empty()) {
-            // Se actualiza el puntero del que antes era el último 
-            int idLast = get<1>(pares[0]).id;
-            grafo.nodes[idLast].par = &pares[0];
+            // Actualizamos la posición del que ahora quedó primero
+            int idNew = get<1>(pares[0]).id;
+            grafo.nodes[idNew].Qpos = 0;
             // Lo anterior puede haber roto la condición del Heap, así que se llama a Heapify sobre su primer elemento
             heapify1(grafo, 0);
         }
@@ -205,21 +200,19 @@ struct Heap{
 
     // Recibe el índice y el valor que se desea colocar en él
     void decreaseKey(Graph& grafo, int i, double k){
-        cout << "decreaseKey" << endl;
         // Se cambia el valor del índice i por k
-        tuple<double, Node> aux = make_tuple(k, get<1>(pares[i]));
-        pares[i] = aux;
+        pares[i] = make_tuple(k, get<1>(pares[i])); 
         // Lo anterior puede haber roto la condición del Heap, así que se revisará toda la rama hacia arriba    
         // Mientras el elemento i tenga un padre y el valor del padre sea mayor que el de i
         while ((i >= 1) && (get<0>(pares[parent(i)]) > get<0>(pares[i]))){
             int parentIndex = parent(i);
-            // Se intercambian los punteros
-            int idActual = get<1>(pares[i]).id;
-            int idParent = get<1>(pares[parentIndex]).id;
-            grafo.nodes[idActual].par = &pares[parentIndex];
-            grafo.nodes[idParent].par = &pares[i];
             // Se intercambia la posición del elemento i y su padre
-            swap(pares[i], pares[parentIndex]);      
+            swap(pares[i], pares[parentIndex]);    
+            // Se actualizan las posiciones de los pares intercambiados  
+            int iId = get<1>(pares[i]).id;
+            int idparentIndex = get<1>(pares[parentIndex]).id;
+            grafo.nodes[iId].Qpos = i;
+            grafo.nodes[idparentIndex].Qpos = parentIndex;
             // Se revisa nuevamente hacia arriba
             i = parentIndex;
         }
@@ -255,24 +248,23 @@ pair<vector<double>, vector<int>> dijkstraWithHeap(Graph& graph, int raiz) {
         // Obtenemos el par (d, v) con menor distancia en Q y lo eliminamos.
         tuple<double, Node> dv = Q.extractMin(graph);
         int v = get<1>(dv).id;
+         double distanciasV = distancias[v];
         // Por cada vecino u del nodo v:
         for (const auto& u : graph.nodes[v].neighbors) {
-            int u_id = u.first;
-            double distanciasU = distancias[u_id];
-            double distanciasV = distancias[v];
+            int uId = u.first;
+            double distanciasU = distancias[uId];       
             double aristaUV = u.second.weight;
             double alt = distanciasV + aristaUV;
 
             // Si la distancia guardada para u (distancias[u]) es mayor a la distancia guardada para v (distancias[v]) más el peso de la arista (u, v) 
-            if (distanciasU > alt) {
+            if (distanciasU > alt) {           
                 // Actualizamos el valor de la distancia de u,
-                distancias[u_id] = alt;
+                distancias[uId] = alt;
                 // Guardamos v como el nodo previo de u 
-                previos[u_id] = v;
-                // Actualizamos la distancia del par que representa al nodo u en Q utilizando decreaseKey
-                ptrdiff_t uIndex = graph.nodes[u_id].par - &Q.pares[0];
-                cout << "uIndex = " << uIndex << endl;
-                Q.decreaseKey(graph, uIndex, alt);
+                previos[uId] = v;
+                // Actualizamos
+                Q.decreaseKey(graph, graph.nodes[uId].Qpos, alt);
+
             }
         }
     }

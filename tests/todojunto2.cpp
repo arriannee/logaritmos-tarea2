@@ -269,6 +269,12 @@ pair<vector<double>, vector<int>> dijkstraWithHeap(Graph& graph, int raiz) {
         }
     }
 
+    for (size_t i = 0; i < distancias.size(); ++i) {
+        if (distancias[i] > 1){
+            cout << "Nodo: " << i << " distancia: " << distancias[i] << endl;
+        }
+    }
+
     // Retornamos el arreglo de previos y distancias.
     return {distancias, previos};
 }

@@ -64,8 +64,8 @@ Graph construirGrafo(int numeroi, int numeroj){
     }
     // Saliendo de este for se garantiza la conectividad
 
-    // Añadir las 2^numeroj aristas adicionales
-    int totalAristas = pow(2, numeroj);
+    // Añadir las 2^numeroj - (v-1) aristas adicionales (v = 2^i)
+    int totalAristas = pow(2, numeroj) - (numNodos+1);
     for(int j = 0; j < totalAristas; j++){
         uniform_int_distribution<> dis2(0, numNodos - 1);
         int nodo1 = dis2(gen);

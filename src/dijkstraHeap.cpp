@@ -57,7 +57,7 @@ pair<vector<double>, vector<int>> dijkstraWithHeap(Graph& graph, int raiz) {
 // Función para probar Dijkstra con cola de Fibonacci en un grafo grande
 void testDijkstraWithHeap() {
     cout << "PRUEBA 1: 2^10 nodos, 2^12 aristas \n";
-    Graph grafo1 = construirGrafo(10, 12); // 10 nodos, 12 aristas
+    Graph grafo1 = construirGrafo(14, 22); // 10 nodos, 12 aristas
     //imprimirGrafo(grafo1);
     auto resultado = dijkstraWithHeap(grafo1, 0);
 

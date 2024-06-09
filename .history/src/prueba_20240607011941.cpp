@@ -465,6 +465,8 @@ int main() {
 
 using namespace std;
 
+// Incluye tus definiciones y funciones aquí (como las estructuras de Edge, Node, Graph, etc.)
+
 // Implementación confiable de Dijkstra usando un min-heap para comparación
 pair<vector<double>, vector<int>> dijkstraWithMinHeap(const Graph& graph, int raiz) {
     vector<double> distancias(graph.nodes.size(), numeric_limits<double>::infinity());

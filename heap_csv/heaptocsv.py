@@ -6,8 +6,8 @@ with open('tiempos_dijkstra_heap.txt', 'r') as file:
 
 # Abre el archivo CSV para escribir
 with open('tiempos_heap_2^10.csv', 'w') as csv_file:
-    # Escribe la cabecera opcional si la deseas
-    # csv_file.write('E, T\n')
+    # Cabecera
+    csv_file.write('aristas, tiempo\n')
 
     # Recorre cada línea del archivo original
     for i, line in enumerate(lines[:150]):
@@ -26,8 +26,8 @@ print("Archivo tiempos_heap_2^10.csv generado exitosamente.")
 
 # Abre el archivo CSV para escribir
 with open('tiempos_heap_2^12.csv', 'w') as csv_file:
-    # Escribe la cabecera opcional si la deseas
-    # csv_file.write('E, T\n')
+    # Cabecera
+    csv_file.write('aristas, tiempo\n')
 
     # Recorre cada línea del archivo original
     for i, line in enumerate(lines[150:500]):
@@ -47,8 +47,8 @@ print("Archivo tiempos_heap_2^12.csv generado exitosamente.")
 
 # Abre el archivo CSV para escribir
 with open('tiempos_heap_2^14.csv', 'w') as csv_file:
-    # Escribe la cabecera opcional si la deseas
-    # csv_file.write('E, T\n')
+    # Cabecera
+    csv_file.write('aristas, tiempo\n')
 
     # Recorre cada línea del archivo original
     for i, line in enumerate(lines[500:850]):

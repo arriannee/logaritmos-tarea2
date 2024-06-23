@@ -1,5 +1,5 @@
 # Tarea 2: Dijkstra y Análisis Amortizado
-Este proyecto implementa dos versiones del algoritmo de Dijkstra para encontrar caminos más cortos en un grafo no dirigido con pesos positivos en sus aristas. Las dos implementaciones utilizan diferentes estructuras de datos para la cola de prioridad: un Heap y una Cola de Fibonacci. El objetivo principal es analizar empíricamente la diferencia en las complejidades globales entre estos dos algoritmos.
+Este proyecto implementa dos versiones del algoritmo de Dijkstra para encontrar caminos más cortos en un grafo no dirigido con pesos positivos en sus aristas. Las dos implementaciones utilizan diferentes estructuras de datos para la cola de prioridad: un Heap y una Cola de Fibonacci. El objetivo principal es analizar la diferencia en las complejidades globales entre estos dos algoritmos.
 
 # Estructura del Repositorio
 ```
